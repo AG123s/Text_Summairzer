@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Summarizer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+            background-color: #f9f9f9;
+        }
+        textarea {
+            width: 100%;
+            height: 150px;
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .summary {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #e9ecef;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>Text Summarizer</h1>
+    <textarea id="textInput" placeholder="Enter your text here..."></textarea>
+    <button onclick="summarizeText()">Summarize</button>
+    <div id="output" class="summary"></div>
+    <div id="error" class="error"></div>
+
+    <script>
+        async function summarizeText() {
+            const text = document.getElementById("textInput").value;
+            const output = document.getElementById("output");
+            const errorDiv = document.getElementById("error");
+            
+            output.innerHTML = ""; // Clear output
+            errorDiv.innerHTML = ""; // Clear error messages
+            
+            if (!text.trim()) {
+                errorDiv.textContent = "Please enter some text to summarize.";
+                return;
+            }
+
+            output.textContent = "Summarizing...";
+            
+            try {
+                // Call the backend endpoint
+                const response = await fetch("/summarize", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ text })
+                });
+
+                if (!response.ok) {
+                    throw new Error("Failed to summarize. Please try again later.");
+                }
+
+                const data = await response.json();
+
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                output.innerHTML = `<strong>Summary:</strong> ${data.summary}`;
+            } catch (error) {
+                output.textContent = "";
+                errorDiv.textContent = `Error: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>
